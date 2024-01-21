@@ -236,3 +236,26 @@ function getHumanReadingDate(timestamp) {
 function isLeapYear(year) {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
+
+function getHumanReadingDateOptimal(timestamp) {
+  // Create a new Date object from the timestamp
+  const date = new Date(timestamp * 1000); // JavaScript uses milliseconds
+
+  return {
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth() + 1, // getUTCMonth() returns a zero-based month
+    day: date.getUTCDate(),
+    hours: date.getUTCHours(),
+    minutes: date.getUTCMinutes(),
+    seconds: date.getUTCSeconds(),
+    toString: function () {
+      return `${this.year}-${this.month.toString().padStart(2, "0")}-${this.day
+        .toString()
+        .padStart(2, "0")}T${this.hours
+        .toString()
+        .padStart(2, "0")}:${this.minutes
+        .toString()
+        .padStart(2, "0")}:${this.seconds.toString().padStart(2, "0")}Z`;
+    },
+  };
+}
