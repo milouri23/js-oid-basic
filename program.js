@@ -13,22 +13,17 @@
 // -> [6, 5, 10, 13, 3, 7, 7, 13], 8
 // -> 6 * 16^7 + 5 * 16^6 + 10 * 16^5 + 13 * 16^4 + 3 * 16^3 + 7 * 16^2 + 7 * 16^1 + 13 * 16^0
 // -> 1705850749
-const hexMap = {
-  a: 10,
-  b: 11,
-  c: 12,
-  d: 13,
-  e: 14,
-  f: 15,
-};
+
+const fs = require("fs");
+const path = require("path");
 
 const readline = require("readline");
-
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
+const hexMap = require("./hexMap");
 const defaultObjectId = "65ad377d80f38f709b64dd28";
 
 rl.question("Please enter the objectId: ", (objectId) => {
@@ -44,7 +39,7 @@ rl.question("Please enter the objectId: ", (objectId) => {
     // To let the user read the message
     setTimeout(() => {
       objectIdToDateTime(defaultObjectId);
-    }, 3000);
+    }, 2000);
   }
   rl.close();
 });
@@ -52,7 +47,7 @@ rl.question("Please enter the objectId: ", (objectId) => {
 function objectIdToDateTime(objectId) {
   console.log(objectId);
 
-  // Check that objectId is a string and has at least 8 characters
+  // Check that objectId is a string and has 24 hex characters
   if (
     typeof objectId !== "string" ||
     objectId.length != 24 ||
@@ -76,7 +71,31 @@ function objectIdToDateTime(objectId) {
   console.log(`Each hex character: ${hexCharactersArray} represents a positional element in base 16 number system.
   To get the timestamp we need to convert it to decimal`);
 
-  hexToDecimal(hexCharactersArray);
+  let timestamp = hexToDecimal(hexCharactersArray);
+
+  console.log(`\n\nThe result is ${timestamp}`);
+  console.log(
+    `That indicates that ${timestamp} seconds has passed since the beggining of 01-01-1970`
+  );
+
+  let humanReadingDate = getHumanReadingDate(timestamp);
+
+  console.log(humanReadingDate);
+  console.log("Next is the datetime in ISO 8601 format:");
+  console.log(`${humanReadingDate}`);
+
+  let { toString, ...dateInfo } = humanReadingDate;
+  dateInfo.ISOTimestamp = toString.call(dateInfo);
+
+  WriteOutputFile(dateInfo);
+}
+
+function WriteOutputFile(dateInfo) {
+  const filePath = path.join(__dirname, "out", "dateInfo.json");
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(dateInfo, null, 2));
+
+  console.log(`${filePath} has been saved`);
 }
 
 function isHexString(str) {
@@ -128,17 +147,7 @@ function hexToDecimal(hexArray) {
     return acc;
   }, 0);
 
-  console.log(`\n\nThe result is ${timestamp}`);
-
-  console.log(
-    `That indicates that ${timestamp} seconds has passed since the beggining of 01-01-1970`
-  );
-
-  let humanReadingDate = getHumanReadingDate(timestamp);
-
-  console.log(humanReadingDate);
-  console.log("Next is the datetime in ISO 8601 format:");
-  console.log(`${humanReadingDate}`);
+  return timestamp;
 }
 
 function hexCharToDecimalDigit(hexChar) {
