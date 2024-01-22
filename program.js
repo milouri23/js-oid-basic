@@ -86,8 +86,35 @@ function objectIdToDateTime(objectId) {
 
   let { toString, ...dateInfo } = humanReadingDate;
   dateInfo.ISOTimestamp = toString.call(dateInfo);
+  dateInfo.hexCharacters = first8characters;
 
-  WriteOutputFile(dateInfo);
+  let machineIdentifierHexArray = objectId.substring(8, 14).split("");
+  let machineIdentifier = hexToDecimal(machineIdentifierHexArray);
+
+  let processIdentifierHexArray = objectId.substring(14, 18).split("");
+  let processIdentifier = hexToDecimal(processIdentifierHexArray);
+
+  let counterHexArray = objectId.substring(18, 24).split("");
+  let counter = hexToDecimal(counterHexArray);
+
+  let objectIdInfo = {
+    objectId: objectId,
+    dateInfo: dateInfo,
+    machineIdentifier: {
+      value: machineIdentifier,
+      hexCharacters: objectId.substring(8, 14),
+    },
+    processIdentifier: {
+      value: processIdentifier,
+      hexCharacters: objectId.substring(14, 18),
+    },
+    counter: {
+      value: counter,
+      hexCharacters: objectId.substring(18, 24),
+    },
+  };
+
+  WriteOutputFile(objectIdInfo);
 }
 
 function WriteOutputFile(dateInfo) {
@@ -146,6 +173,8 @@ function hexToDecimal(hexArray) {
 
     return acc;
   }, 0);
+
+  console.log();
 
   return timestamp;
 }
@@ -215,6 +244,7 @@ function getHumanReadingDate(timestamp) {
   }
 
   return {
+    timestamp: timestamp,
     year: year,
     month: month + 1,
     day: daysLeft + 1,
